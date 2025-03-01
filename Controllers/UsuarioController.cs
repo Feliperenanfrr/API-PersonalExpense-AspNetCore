@@ -44,4 +44,38 @@ public class UsuarioController : ControllerBase
         
         return CreatedAtAction("GetUsuario", new { id = usuario.Id }, usuario);
     }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateUser(int id, Usuario usuario)
+    {
+        if (id != usuario.Id)
+        {
+            return BadRequest("ID fornecido na requisição é diferente do ID do usuário");
+        }
+        
+        _context.Entry(usuario).State = EntityState.Modified;
+
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!UsuarioExists(id))
+            {
+                return NotFound("Usuario no encontrado");
+            }
+            else
+            {
+                throw;
+            }
+        }
+        return NoContent();
+    }
+    
+    // Método auxiliar para verificar se um usuário existe no banco de dados
+    private bool UsuarioExists(int id)
+    {
+        return _context.Usuarios.Any(e => e.Id == id);
+    }
 }
